@@ -2,7 +2,11 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/../GitIRC/Base/Base.iml" filepath="$PROJECT_DIR$/../GitIRC/Base/Base.iml" />
       <module fileurl="file://$PROJECT_DIR$/BootLoader.iml" filepath="$PROJECT_DIR$/BootLoader.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../GitIRC/Core/Core.iml" filepath="$PROJECT_DIR$/../GitIRC/Core/Core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../GitIRC/Git/Git.iml" filepath="$PROJECT_DIR$/../GitIRC/Git/Git.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../GitIRC/MC/MC.iml" filepath="$PROJECT_DIR$/../GitIRC/MC/MC.iml" />
     </modules>
   </component>
 </project>

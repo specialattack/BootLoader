@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Class-Path: gson-2.2.4.jar asm-5.0.3.jar asm-analysis-5.0.3.jar asm-commons-5.0.3.jar asm-tree-5.0.3.jar asm-util-5.0.3.jar asm-xml-5.0.3.jar
+Main-Class: net.specialattack.loader.BootLoader
+

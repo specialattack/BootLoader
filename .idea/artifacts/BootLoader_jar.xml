@@ -1,0 +1,12 @@
+<component name="ArtifactManager">
+  <artifact name="BootLoader:jar">
+    <output-path>$USER_HOME$/Desktop/HeldBot/Bootloader</output-path>
+    <root id="root">
+      <element id="archive" name="BootLoader.jar">
+        <element id="module-output" name="BootLoader" />
+      </element>
+      <element id="library" level="module" name="gson-2.2.4.jar" module-name="BootLoader" />
+      <element id="library" level="project" name="asm-5.0.3" />
+    </root>
+  </artifact>
+</component>

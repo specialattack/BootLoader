@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact name="Core:jar">
+    <output-path>$USER_HOME$/Desktop/HeldBot/Bootloader/services</output-path>
+    <root id="root">
+      <element id="archive" name="Core.jar">
+        <element id="module-output" name="Core" />
+      </element>
+    </root>
+  </artifact>
+</component>
