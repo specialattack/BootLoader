@@ -15,7 +15,6 @@ public class ServiceWrapperGenerator implements Opcodes {
         ClassWriter writer = new ClassWriter(0);
         CheckClassAdapter cw = new CheckClassAdapter(writer);
 
-        FieldVisitor fv;
         MethodVisitor mv;
 
         cw.visit(V1_7, ACC_PUBLIC | ACC_SUPER, wrapperType.getInternalName(), null, "java/lang/Object", new String[] { "net/specialattack/loader/IServiceWrapper" });

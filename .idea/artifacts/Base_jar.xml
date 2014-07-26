@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact name="Base:jar">
+    <output-path>$USER_HOME$/Desktop/HeldBot/Bootloader/GitIRC/plugins</output-path>
+    <root id="root">
+      <element id="archive" name="Base.jar">
+        <element id="module-output" name="Base" />
+      </element>
+    </root>
+  </artifact>
+</component>

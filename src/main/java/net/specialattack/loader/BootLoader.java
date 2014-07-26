@@ -1,6 +1,7 @@
 package net.specialattack.loader;
 
 import net.specialattack.loader.config.Configuration;
+import net.specialattack.loader.logging.*;
 import net.specialattack.loader.tracking.TrackableClass;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Type;
@@ -9,6 +10,7 @@ import org.objectweb.asm.tree.ClassNode;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
@@ -16,25 +18,46 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 public final class BootLoader {
 
-    private Set<BootClassLoader> loaders;
     protected static final BootLoader INSTANCE = new BootLoader();
+    private Set<BootClassLoader> loaders;
     private int connectionPort = -1;
+    private String logFile;
     private ServerSocket serverSocket;
     private RunnableSocket runnableSocket;
     private Thread threadSocket;
     private List<ServiceData> services = new ArrayList<ServiceData>();
+    private PrintStream stdOut;
+    private PrintStream stdErr;
 
     private BootLoader() {
+    }
+
+    public static void main(String[] args) {
+        INSTANCE.loadConfig();
+        try {
+            INSTANCE.setup();
+        } catch (IOException e) {
+            System.err.println("Failed setting up connection monitor");
+            e.printStackTrace();
+            System.exit(1);
+        }
+        INSTANCE.startServices();
     }
 
     private void loadConfig() {
         Configuration config = new Configuration(new File("loader.cfg"));
         config.setDefault("connectionPort", -1);
+        config.setDefault("log-file", "./console.log");
         config.load();
         this.connectionPort = config.getInt("connectionPort");
+        this.logFile = config.getString("log-file");
     }
 
     private void setup() throws IOException {
@@ -51,6 +74,8 @@ public final class BootLoader {
                 }
             }
         });
+
+        setupLoggers();
 
         // setup remote connection
         if (this.connectionPort > 0) {
@@ -108,38 +133,76 @@ public final class BootLoader {
         }
     }
 
+    private void setupLoggers() {
+        if (stdOut != null) {
+            resetLoggers();
+        }
+        stdOut = System.out;
+        stdErr = System.err;
+
+        Logger stdout = Logger.getLogger("STDOUT");
+        Logger stderr = Logger.getLogger("STDERR");
+        Logger global = Logger.getLogger("");
+        Logger rawIRC = Logger.getLogger("RawIRC");
+        stdout.setUseParentHandlers(false);
+        stderr.setUseParentHandlers(false);
+        global.setUseParentHandlers(false);
+        rawIRC.setUseParentHandlers(false);
+
+        // Disable stupid logger
+        Logger httpURLConnection = Logger.getLogger("sun.net.www.protocol.http.HttpURLConnection");
+        httpURLConnection.setLevel(Level.OFF);
+
+        ConsoleLogHandler stdoutHandler = new ConsoleLogHandler(System.out);
+        ConsoleLogHandler stderrHandler = new ConsoleLogHandler(System.err);
+        ConsoleLogFormatter formatter = new ConsoleLogFormatter();
+        stdoutHandler.setFormatter(formatter);
+        stdoutHandler.setLevel(Level.INFO);
+        stderrHandler.setFormatter(formatter);
+        stderrHandler.setLevel(Level.INFO);
+
+        stdout.addHandler(stdoutHandler);
+        stdout.setLevel(Level.ALL);
+        stderr.addHandler(stderrHandler);
+        stderr.setLevel(Level.ALL);
+
+        for (Handler handler : global.getHandlers()) {
+            global.removeHandler(handler);
+        }
+        global.addHandler(stdoutHandler);
+        global.setLevel(Level.ALL);
+
+        FileLogHandler fileHandler = null;
+        try {
+            fileHandler = new FileLogHandler("./raw.log", true);
+            fileHandler.setFormatter(new FileLogFormatter());
+            fileHandler.setLevel(Level.ALL);
+            rawIRC.addHandler(fileHandler);
+
+            fileHandler = new FileLogHandler(logFile, true);
+            fileHandler.setFormatter(new FileLogFormatter());
+            fileHandler.setLevel(Level.ALL);
+            stdout.addHandler(fileHandler);
+            stderr.addHandler(fileHandler);
+            global.addHandler(fileHandler);
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+
+        System.setOut(new PrintStream(new LoggerOutputStream(stdout, Level.INFO), true));
+        System.setErr(new PrintStream(new LoggerOutputStream(stderr, Level.WARNING), true));
+    }
+
+    private void resetLoggers() {
+        System.setOut(stdOut);
+        System.setErr(stdErr);
+        LogManager.getLogManager().reset();
+    }
+
     private void stopServices() {
         for (ServiceData service : this.services) {
             for (IServiceWrapper wrapper : service.serviceWrappers) {
                 wrapper.stop();
-            }
-        }
-    }
-
-    public static void main(String[] args) {
-        INSTANCE.loadConfig();
-        try {
-            INSTANCE.setup();
-        } catch (IOException e) {
-            System.err.println("Failed setting up connection monitor");
-            e.printStackTrace();
-            System.exit(1);
-        }
-        INSTANCE.startServices();
-    }
-
-    private class RunnableSocket implements Runnable {
-
-        @Override
-        public void run() {
-            try {
-                Socket socket = BootLoader.this.serverSocket.accept();
-                System.out.println("=== Got connection!");
-                //LocalServer connection = new LocalServer(this.connectionsList, socket);
-                //this.connectionsList.addConnection(connection);
-            } catch (SocketException e) {
-            } catch (IOException e) {
-                e.printStackTrace();
             }
         }
     }
@@ -170,6 +233,22 @@ public final class BootLoader {
                         this.service.trackableClasses.add(name);
                     }
                 }
+            }
+        }
+    }
+
+    private class RunnableSocket implements Runnable {
+
+        @Override
+        public void run() {
+            try {
+                Socket socket = BootLoader.this.serverSocket.accept();
+                System.out.println("=== Got connection!");
+                //LocalServer connection = new LocalServer(this.connectionsList, socket);
+                //this.connectionsList.addConnection(connection);
+            } catch (SocketException e) {
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }

@@ -1,4 +1,3 @@
-
 package net.specialattack.loader.config;
 
 public class ConfigurationException extends RuntimeException {

@@ -1,4 +1,3 @@
-
 package net.specialattack.loader;
 
 public interface IServiceWrapper {

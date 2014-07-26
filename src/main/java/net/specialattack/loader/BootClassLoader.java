@@ -12,9 +12,9 @@ import java.util.jar.JarInputStream;
 
 public class BootClassLoader extends URLClassLoader {
 
+    public static final boolean CLASSLOADER_DEBUGGING = Boolean.parseBoolean(System.getProperty("bootloader.classloaderDebugging", "false"));
     private ClassLoader parent = this.getClass().getClassLoader();
     private List<URL> jars;
-
     private Map<String, Class<?>> classCache = new HashMap<String, Class<?>>();
     private Map<String, byte[]> classBytesCache = new HashMap<String, byte[]>();
     private Set<String> missingClasses = new HashSet<String>();
@@ -23,8 +23,6 @@ public class BootClassLoader extends URLClassLoader {
     private Set<String> transformerExceptions = new HashSet<String>();
     private Set<IClassTransformer> classTransformers = new HashSet<IClassTransformer>();
     private Set<IClassInspector> classInspectors = new HashSet<IClassInspector>();
-
-    public static final boolean CLASSLOADER_DEBUGGING = Boolean.parseBoolean(System.getProperty("bootloader.classloaderDebugging", "false"));
 
     public BootClassLoader(URL[] jars) {
         super(jars, BootClassLoader.class.getClassLoader());
